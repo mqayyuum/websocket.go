@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Websocket Chat</title>
+</head>
+
+<body>
+    <textarea readonly id="chatLog" cols="100" rows="20"></textarea><br>
+    <input type="text" id="msgInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var ws = new WebSocket("ws://localhost:8080/ws")
+
+        ws.onmessage = function (event) {
+            var chatLog = document.getElementById("chatLog");
+            chatLog.value += event.data + "/n";
+        }
+
+        ws.onerror = function (event) {
+            console.error("Websocket error observed:", event);
+        }
+
+        function sendMessage() {
+            var msgInput = document.getElementById("msgInput");
+            ws.send(JSON.stringify({ message: msgInput.value }));
+            msgInput.value = "";
+        }
+    </script>
+</body>
+
+</html>
