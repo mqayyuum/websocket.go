@@ -15,17 +15,22 @@
         var ws = new WebSocket("ws://localhost:8080/ws")
 
         ws.onmessage = function (event) {
+            console.log(event);
             var chatLog = document.getElementById("chatLog");
-            chatLog.value += event.data + "/n";
+            var msg = JSON.parse(event.data)
+            chatLog.value += msg.username + ": " + msg.content + "\n";
         }
 
         ws.onerror = function (event) {
             console.error("Websocket error observed:", event);
         }
 
+        var username = prompt("Enter your username:");
+
         function sendMessage() {
             var msgInput = document.getElementById("msgInput");
-            ws.send(JSON.stringify({ message: msgInput.value }));
+            var message = { username: username, content: msgInput.value };
+            ws.send(JSON.stringify(message));
             msgInput.value = "";
         }
     </script>

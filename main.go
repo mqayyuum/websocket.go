@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -8,8 +9,11 @@ import (
 )
 
 type Message struct {
-	Message string `json:"message"`
+	Username string `json:"username"`
+	Content  string `json:"content"`
 }
+
+var rdb = startRedis()
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -39,6 +43,17 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 			delete(clients, ws)
 			break
 		}
+
+		convertedMsg, err := json.Marshal(msg)
+		if err != nil {
+			log.Printf("Error reading JSON: %v, Payload: %v", err, msg)
+			delete(clients, ws)
+			break
+		}
+
+		var room = "room1"
+		storeMessage(room, string(convertedMsg))
+		publishMessage(room, string(convertedMsg))
 
 		broadcast <- msg
 	}
